@@ -161,7 +161,9 @@ def generar(client, prompt, datos_txt, imagenes):
         model=MODELO_CLAUDE, max_tokens=1500,
         messages=[{"role": "user", "content": contenido}],
     )
-    return parse_salida(resp.content[0].text)
+    # Unir solo los bloques de texto (el modelo puede devolver antes bloques de "thinking")
+    texto = "".join(getattr(b, "text", "") for b in resp.content if getattr(b, "type", "") == "text")
+    return parse_salida(texto)
 
 # ================= INTERFAZ =================
 st.set_page_config(page_title="Descripciones de producto · Kbas", page_icon="📝")
