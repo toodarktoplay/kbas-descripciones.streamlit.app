@@ -171,11 +171,32 @@ st.title("📝 Descripciones de producto")
 st.caption("Sube las fotos (se agrupan solas por referencia) y el Excel de datos. Elige el prompt y "
            "la herramienta saca, por cada bolso: descripción + 3 titulares. Luego descargas el Excel.")
 
+def secreto(nombre):
+    try:
+        return st.secrets.get(nombre, "")
+    except Exception:
+        return ""
+
+# --- Contraseña (solo se exige si hay 'app_password' en Secrets) ---
+_pw = secreto("app_password")
+if _pw and not st.session_state.get("_auth_ok"):
+    _in = st.text_input("Contraseña", type="password")
+    if _in == _pw:
+        st.session_state["_auth_ok"] = True
+    else:
+        if _in:
+            st.error("Contraseña incorrecta.")
+        st.stop()
+
+# --- Clave de API: SOLO servidor. Si está en Secrets no se muestra nunca. ---
+api_key = secreto("anthropic_api_key")
 with st.sidebar:
     st.subheader("Motor de IA")
-    api_key = st.text_input("Clave de API de Claude", type="password",
-                            value=st.secrets.get("anthropic_api_key", "") if hasattr(st, "secrets") else "")
-    st.caption("Se consigue en console.anthropic.com → API Keys. Es de pago por uso, aparte de la suscripción.")
+    if api_key:
+        st.success("Clave de Claude cargada ✓")
+    else:
+        api_key = st.text_input("Clave de API de Claude", type="password")
+        st.caption("Se consigue en console.anthropic.com → API Keys. Es de pago por uso, aparte de la suscripción.")
 
 c1, c2 = st.columns([1, 1])
 with c1:
